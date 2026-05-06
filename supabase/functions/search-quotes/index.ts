@@ -13,7 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    const { query = "" } = await req.json().catch(() => ({ query: "" }));
+    const {
+      query = "",
+      page_number = 0,
+      page_size = 10,
+    } = await req.json().catch(() => ({ query: "" }));
+
     const trimmedQuery = query.trim();
 
     if (trimmedQuery.length < 2) {
@@ -33,6 +38,8 @@ serve(async (req) => {
 
     const { data, error } = await supabase.rpc("search_quotes", {
       search_query: trimmedQuery,
+      page_number,
+      page_size,
     });
 
     if (error) {
