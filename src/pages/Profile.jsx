@@ -1,19 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useSavedQuotes } from "../hooks/useSavedQuotes";
 import { supabase } from "../lib/supabase";
 
-const getInitial = (user) => {
-  const name = user?.user_metadata?.display_name || user?.email || "";
-  return name ? name.charAt(0).toUpperCase() : "?";
-};
-
 const formatMemberSince = (dateString) => {
-  if (!dateString) {
-    return "";
-  }
-
+  if (!dateString) return "";
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
@@ -27,14 +19,89 @@ export const Profile = () => {
   const { savedQuotes } = useSavedQuotes();
   const navigate = useNavigate();
 
+  // ── Auth / session state ──────────────────────────────────────────
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
 
-  const displayName = user?.user_metadata?.display_name || user?.email || "";
+  // ── Profile / display name state ─────────────────────────────────
+  const [profileName, setProfileName] = useState(null); // null = not yet loaded
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+  const [nameError, setNameError] = useState(null);
+  const inputRef = useRef(null);
+  const nameSavedTimerRef = useRef(null);
+
   const memberSince = formatMemberSince(user?.created_at);
-  const avatarInitial = getInitial(user);
+
+  // Fetch display_name from profiles table on mount
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .single();
+
+      setProfileName(data?.display_name ?? "");
+    };
+
+    fetchProfile();
+  }, [user?.id]);
+
+  // Focus input when edit mode opens
+  useEffect(() => {
+    if (isEditingName) {
+      inputRef.current?.focus();
+    }
+  }, [isEditingName]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (nameSavedTimerRef.current) clearTimeout(nameSavedTimerRef.current);
+    };
+  }, []);
+
+  const handleStartEdit = () => {
+    setEditValue(profileName ?? "");
+    setNameError(null);
+    setIsEditingName(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setNameError(null);
+  };
+
+  const handleSaveName = async () => {
+    if (isSavingName) return;
+    setIsSavingName(true);
+    setNameError(null);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: editValue.trim(), updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      setProfileName(editValue.trim());
+      setIsEditingName(false);
+      setNameSaved(true);
+      nameSavedTimerRef.current = setTimeout(() => setNameSaved(false), 2000);
+    } catch (err) {
+      setNameError(err?.message ?? "Failed to update name.");
+    } finally {
+      setIsSavingName(false);
+    }
+  };
 
   const handleSignOut = async () => {
     if (isSigningOut) return;
@@ -54,8 +121,6 @@ export const Profile = () => {
     try {
       const { error } = await supabase.functions.invoke("delete-account");
       if (error) throw error;
-
-      // Sign out after successful deletion
       await signOut();
       navigate("/", { replace: true });
     } catch (err) {
@@ -64,25 +129,96 @@ export const Profile = () => {
     }
   };
 
+  // Derived display values
+  const shownName = profileName || null;
+  const avatarInitial =
+    (profileName || user?.email || "?").charAt(0).toUpperCase();
+
   return (
     <div className="w-full overflow-x-hidden min-h-[calc(100vh-60px)] bg-neutral-50 px-4 py-10">
       <div className="mx-auto w-full max-w-2xl space-y-4">
 
-        {/* Main profile card */}
+        {/* ── Main profile card ── */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
+
+          {/* Avatar + info */}
           <div className="flex items-center gap-4">
-            {/* Avatar with ring outline */}
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-base font-semibold text-neutral-800 ring-2 ring-neutral-200 ring-offset-2"
-            >
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-base font-semibold text-neutral-800 ring-2 ring-neutral-200 ring-offset-2">
               {avatarInitial}
             </div>
-            <div>
-              <p className="text-lg font-semibold text-neutral-900">
-                {displayName}
-              </p>
+
+            <div className="min-w-0 flex-1">
+              {/* Display name row */}
+              {isEditingName ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveName();
+                      if (e.key === "Escape") handleCancelEdit();
+                    }}
+                    className="h-8 flex-1 rounded-lg border border-neutral-200 px-3 text-sm text-neutral-800 focus:border-neutral-400 focus:outline-none min-w-0"
+                    placeholder="Your display name"
+                    disabled={isSavingName}
+                  />
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleSaveName}
+                      disabled={isSavingName}
+                      className="rounded-lg bg-neutral-900 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
+                    >
+                      {isSavingName ? "Saving…" : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      disabled={isSavingName}
+                      className="rounded-lg border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  {shownName ? (
+                    <p className="text-lg font-semibold text-neutral-900">
+                      {shownName}
+                    </p>
+                  ) : (
+                    <p className="text-lg italic text-neutral-400">
+                      No name set
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleStartEdit}
+                    className="rounded-md border border-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700"
+                  >
+                    Edit name
+                  </button>
+                  {nameSaved && (
+                    <span className="text-xs text-emerald-600">Name updated!</span>
+                  )}
+                </div>
+              )}
+
+              {nameError && (
+                <p className="mt-1 text-xs text-rose-600">{nameError}</p>
+              )}
+
+              {/* Email */}
+              {user?.email && (
+                <p className="mt-0.5 text-sm text-neutral-500">{user.email}</p>
+              )}
+
+              {/* Member since */}
               {memberSince && (
-                <p className="text-sm text-neutral-500">
+                <p className="mt-0.5 text-xs text-neutral-400">
                   Member since {memberSince}
                 </p>
               )}
@@ -128,7 +264,7 @@ export const Profile = () => {
           </div>
         </div>
 
-        {/* Danger zone card */}
+        {/* ── Danger zone card ── */}
         <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-red-400">
             Danger zone

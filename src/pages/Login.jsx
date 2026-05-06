@@ -11,6 +11,7 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [signUpEmail, setSignUpEmail] = useState(null); // success banner
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -46,6 +47,13 @@ export const Login = () => {
         if (signUpError) {
           throw signUpError;
         }
+
+        // Show confirmation banner, switch to sign-in, clear fields
+        setSignUpEmail(email);
+        setIsSignUp(false);
+        setDisplayName("");
+        setEmail("");
+        setPassword("");
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -66,6 +74,22 @@ export const Login = () => {
   return (
     <div className="w-full overflow-x-hidden flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+
+        {/* ── Sign-up success banner ── */}
+        {signUpEmail && (
+          <div className="mb-6 flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <span className="mt-0.5 text-lg leading-none" aria-hidden="true">
+              📬
+            </span>
+            <p className="text-sm text-emerald-800">
+              <span className="font-semibold">Check your email!</span> We sent a
+              confirmation link to{" "}
+              <span className="font-medium">{signUpEmail}</span>. Click the link
+              to activate your account, then sign in below.
+            </p>
+          </div>
+        )}
+
         <h1 className="text-2xl font-semibold text-neutral-900">
           Welcome to Quotidian
         </h1>
@@ -168,7 +192,13 @@ export const Login = () => {
             disabled={isSubmitting}
             className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSignUp ? "Create account" : "Sign in"}
+            {isSubmitting
+              ? isSignUp
+                ? "Creating account…"
+                : "Signing in…"
+              : isSignUp
+              ? "Create account"
+              : "Sign in"}
           </button>
         </form>
 
@@ -181,7 +211,11 @@ export const Login = () => {
         <button
           type="button"
           className="mt-6 w-full text-sm font-medium text-neutral-600 hover:text-neutral-800"
-          onClick={() => setIsSignUp((prev) => !prev)}
+          onClick={() => {
+            setIsSignUp((prev) => !prev);
+            setError(null);
+            setSignUpEmail(null);
+          }}
         >
           {isSignUp
             ? "Already have an account? Sign in"
