@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-export const ChatInput = ({ onSend, disabled }) => {
+export const ChatInput = ({
+  onSend,
+  disabled,
+  placeholder = "Ask about a quote...",
+  isRateLimited = false,
+}) => {
   const [message, setMessage] = useState("");
   const isDisabled = disabled || !message.trim();
 
@@ -22,8 +27,12 @@ export const ChatInput = ({ onSend, disabled }) => {
     >
       <input
         type="text"
-        className="h-11 flex-1 rounded-lg border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none transition-colors placeholder:text-neutral-400 focus:border-primary-500"
-        placeholder="Ask about a quote..."
+        className={`h-11 flex-1 rounded-lg border border-neutral-200 px-4 text-sm outline-none transition-colors placeholder:text-neutral-400 focus:border-primary-500 ${
+          isRateLimited
+            ? "bg-neutral-100 text-neutral-400"
+            : "bg-white text-neutral-800"
+        }`}
+        placeholder={placeholder}
         value={message}
         onChange={(event) => setMessage(event.target.value)}
         disabled={disabled}
