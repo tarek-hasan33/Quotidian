@@ -85,6 +85,7 @@ export const Search = () => {
             placeholder="Search quotes, authors, or topics"
             className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-4 pl-10 pr-10 text-sm text-neutral-800 outline-none transition-colors placeholder:text-neutral-400 focus:border-neutral-400"
             aria-label="Search quotes"
+            maxLength={100}
           />
 
           {query && (

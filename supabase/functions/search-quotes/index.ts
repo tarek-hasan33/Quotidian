@@ -19,7 +19,7 @@ serve(async (req) => {
       page_size = 10,
     } = await req.json().catch(() => ({ query: "" }));
 
-    const trimmedQuery = query.trim();
+    const trimmedQuery = query.trim().slice(0, 100);
 
     if (trimmedQuery.length < 2) {
       return new Response(JSON.stringify({ results: [] }), {
@@ -49,10 +49,13 @@ serve(async (req) => {
     return new Response(JSON.stringify({ results: data ?? [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Search failed. Please try again." }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });

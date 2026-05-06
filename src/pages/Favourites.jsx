@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { QuoteCard } from "../components/quote/QuoteCard";
+import { QuoteCardSkeleton } from "../components/quote/QuoteCardSkeleton";
 import { useSavedQuotes } from "../hooks/useSavedQuotes";
 
 export const Favourites = () => {
@@ -20,7 +21,11 @@ export const Favourites = () => {
         </div>
 
         {loading && (
-          <p className="mt-6 text-sm text-neutral-500">Loading quotes...</p>
+          <div className="mt-6 grid items-stretch gap-4 sm:gap-6 md:grid-cols-2">
+            <QuoteCardSkeleton />
+            <QuoteCardSkeleton />
+            <QuoteCardSkeleton />
+          </div>
         )}
 
         {!loading && error && (

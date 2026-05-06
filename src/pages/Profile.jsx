@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useSavedQuotes } from "../hooks/useSavedQuotes";
 import { supabase } from "../lib/supabase";
+import { ErrorMessage } from "../components/ui/ErrorMessage";
 
 const formatMemberSince = (dateString) => {
   if (!dateString) return "";
@@ -46,22 +47,35 @@ export const Profile = () => {
 
   const memberSince = formatMemberSince(user?.created_at);
 
-  // Fetch display_name from profiles table on mount
-  useEffect(() => {
-    if (!user?.id) return;
+  // Fetch display_name from profiles table on mount, with error handling
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState(null);
 
-    const fetchProfile = async () => {
-      const { data } = await supabase
+  const fetchProfile = useCallback(async () => {
+    if (!user?.id) return;
+    setProfileLoading(true);
+    setProfileError(null);
+
+    try {
+      const { data, error } = await supabase
         .from("profiles")
         .select("display_name")
         .eq("id", user.id)
         .single();
 
-      setProfileName(data?.display_name ?? "");
-    };
+      if (error) throw error;
 
-    fetchProfile();
+      setProfileName(data?.display_name ?? "");
+    } catch (err) {
+      setProfileError(err?.message ?? "Failed to load profile.");
+    } finally {
+      setProfileLoading(false);
+    }
   }, [user?.id]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   // Focus input when edit mode opens
   useEffect(() => {
@@ -218,6 +232,28 @@ export const Profile = () => {
   return (
     <div className="w-full overflow-x-hidden min-h-[calc(100vh-60px)] bg-neutral-50 px-4 py-10">
       <div className="mx-auto w-full max-w-2xl space-y-4">
+        {profileError && (
+          <div className="mt-2">
+            <ErrorMessage
+              title="Unable to load profile"
+              description="Something went wrong while loading your profile."
+              actionLabel="Retry"
+              onAction={fetchProfile}
+            />
+          </div>
+        )}
+
+        {profileLoading && (
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 animate-pulse rounded-full bg-neutral-200" />
+              <div className="flex-1">
+                <div className="h-5 w-48 animate-pulse rounded bg-neutral-200" />
+                <div className="mt-2 h-4 w-32 animate-pulse rounded bg-neutral-200" />
+              </div>
+            </div>
+          </div>
+        )}
         {/* ── Main profile card ── */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
           {/* Avatar + info */}
@@ -242,6 +278,7 @@ export const Profile = () => {
                     className="h-8 flex-1 rounded-lg border border-neutral-200 px-3 text-sm text-neutral-800 focus:border-neutral-400 focus:outline-none min-w-0"
                     placeholder="Your display name"
                     disabled={isSavingName}
+                    maxLength={50}
                   />
                   <div className="flex gap-1.5">
                     <button

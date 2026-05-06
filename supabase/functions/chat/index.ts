@@ -45,16 +45,15 @@ serve(async (req) => {
     );
 
     const responseText = await response.text();
-    console.log("Gemini response", {
-      status: response.status,
-      body: responseText,
-    });
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: responseText }), {
-        status: response.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Failed to get a response. Please try again." }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const data = JSON.parse(responseText);
@@ -63,10 +62,13 @@ serve(async (req) => {
     return new Response(JSON.stringify({ data: text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
