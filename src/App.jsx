@@ -7,6 +7,7 @@ import { ChatBubble } from "./components/chat/ChatBubble";
 import { Favourites } from "./pages/Favourites";
 import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
+import { ResetPassword } from "./pages/ResetPassword";
 
 export const App = () => (
   <BrowserRouter>
@@ -23,6 +24,7 @@ export const App = () => (
         }
       />
       <Route path="/login" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route
         path="/profile"
         element={

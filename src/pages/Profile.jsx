@@ -18,6 +18,7 @@ export const Profile = () => {
   const { user, signOut } = useAuth();
   const { savedQuotes } = useSavedQuotes();
   const navigate = useNavigate();
+  const isEmailUser = user?.app_metadata?.provider === "email";
 
   // ── Auth / session state ──────────────────────────────────────────
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -32,8 +33,16 @@ export const Profile = () => {
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
   const [nameError, setNameError] = useState(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordUpdateError, setPasswordUpdateError] = useState(null);
+  const [passwordUpdated, setPasswordUpdated] = useState(false);
   const inputRef = useRef(null);
   const nameSavedTimerRef = useRef(null);
+  const passwordSavedTimerRef = useRef(null);
 
   const memberSince = formatMemberSince(user?.created_at);
 
@@ -65,8 +74,23 @@ export const Profile = () => {
   useEffect(() => {
     return () => {
       if (nameSavedTimerRef.current) clearTimeout(nameSavedTimerRef.current);
+      if (passwordSavedTimerRef.current)
+        clearTimeout(passwordSavedTimerRef.current);
     };
   }, []);
+
+  const passwordHasUppercase = /[A-Z]/.test(newPassword);
+  const passwordHasSpecial = /[!@#$%^&*()_+\-=\[\]{}|;':",.<>?\\/]/.test(
+    newPassword
+  );
+  const passwordHasMinLength = newPassword.length >= 8;
+  const passwordStrength = !newPassword
+    ? null
+    : !passwordHasMinLength
+    ? "weak"
+    : passwordHasUppercase && passwordHasSpecial
+    ? "strong"
+    : "fair";
 
   const handleStartEdit = () => {
     setEditValue(profileName ?? "");
@@ -87,7 +111,10 @@ export const Profile = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: editValue.trim(), updated_at: new Date().toISOString() })
+        .update({
+          display_name: editValue.trim(),
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", user.id);
 
       if (error) throw error;
@@ -113,6 +140,57 @@ export const Profile = () => {
     }
   };
 
+  const handleCancelPasswordChange = () => {
+    setShowChangePassword(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordUpdateError(null);
+  };
+
+  const handleSavePassword = async () => {
+    if (isUpdatingPassword) return;
+    setPasswordUpdateError(null);
+
+    if (!currentPassword) {
+      setPasswordUpdateError("Please enter your current password");
+      return;
+    }
+
+    if (!passwordHasMinLength || !passwordHasUppercase || !passwordHasSpecial) {
+      setPasswordUpdateError(
+        "Password must be at least 8 characters with one uppercase letter and one special character"
+      );
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordUpdateError("New passwords do not match");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) throw error;
+
+      setPasswordUpdated(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      passwordSavedTimerRef.current = setTimeout(() => {
+        setPasswordUpdated(false);
+        setShowChangePassword(false);
+      }, 2000);
+    } catch (err) {
+      setPasswordUpdateError(err?.message ?? "Failed to update password.");
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (isDeletingAccount) return;
     setIsDeletingAccount(true);
@@ -124,23 +202,24 @@ export const Profile = () => {
       await signOut();
       navigate("/", { replace: true });
     } catch (err) {
-      setDeleteError(err?.message ?? "Failed to delete account. Please try again.");
+      setDeleteError(
+        err?.message ?? "Failed to delete account. Please try again."
+      );
       setIsDeletingAccount(false);
     }
   };
 
   // Derived display values
   const shownName = profileName || null;
-  const avatarInitial =
-    (profileName || user?.email || "?").charAt(0).toUpperCase();
+  const avatarInitial = (profileName || user?.email || "?")
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <div className="w-full overflow-x-hidden min-h-[calc(100vh-60px)] bg-neutral-50 px-4 py-10">
       <div className="mx-auto w-full max-w-2xl space-y-4">
-
         {/* ── Main profile card ── */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
-
           {/* Avatar + info */}
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-base font-semibold text-neutral-800 ring-2 ring-neutral-200 ring-offset-2">
@@ -202,7 +281,9 @@ export const Profile = () => {
                     Edit name
                   </button>
                   {nameSaved && (
-                    <span className="text-xs text-emerald-600">Name updated!</span>
+                    <span className="text-xs text-emerald-600">
+                      Name updated!
+                    </span>
                   )}
                 </div>
               )}
@@ -224,6 +305,141 @@ export const Profile = () => {
               )}
             </div>
           </div>
+
+          {isEmailUser && showChangePassword && (
+            <div className="mt-6 border-t border-neutral-200 pt-5">
+              <div className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+                <p className="text-sm font-medium text-neutral-800">
+                  Change Password
+                </p>
+
+                <div>
+                  <label className="text-sm font-medium text-neutral-700">
+                    Current password
+                  </label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(event) => {
+                      setCurrentPassword(event.target.value);
+                      setPasswordUpdateError(null);
+                    }}
+                    className="mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-200"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-neutral-700">
+                    New password
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(event) => {
+                      setNewPassword(event.target.value);
+                      setPasswordUpdateError(null);
+                    }}
+                    className="mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-200"
+                    placeholder="••••••••"
+                  />
+                  {passwordStrength && (
+                    <div className="mt-2">
+                      <div className="flex gap-1">
+                        {Array.from({ length: 3 }).map((_, index) => {
+                          const filledCount =
+                            passwordStrength === "weak"
+                              ? 1
+                              : passwordStrength === "fair"
+                              ? 2
+                              : 3;
+                          const isFilled = index < filledCount;
+                          const colorClass =
+                            passwordStrength === "weak"
+                              ? "bg-red-400"
+                              : passwordStrength === "fair"
+                              ? "bg-amber-400"
+                              : "bg-emerald-400";
+
+                          return (
+                            <span
+                              key={`profile-strength-bar-${index}`}
+                              className={`h-1.5 w-8 rounded-full ${
+                                isFilled ? colorClass : "bg-neutral-200"
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <p
+                        className={`mt-1 text-xs ${
+                          passwordStrength === "weak"
+                            ? "text-red-400"
+                            : passwordStrength === "fair"
+                            ? "text-amber-400"
+                            : "text-emerald-400"
+                        }`}
+                      >
+                        {passwordStrength === "weak"
+                          ? "Weak"
+                          : passwordStrength === "fair"
+                          ? "Fair"
+                          : "Strong"}
+                      </p>
+                      <p className="mt-1 text-xs text-neutral-400">
+                        Min 8 characters, one uppercase, one special character
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-neutral-700">
+                    Confirm new password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(event) => {
+                      setConfirmNewPassword(event.target.value);
+                      setPasswordUpdateError(null);
+                    }}
+                    className="mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-200"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                {passwordUpdateError && (
+                  <p className="text-xs text-red-500" role="alert">
+                    {passwordUpdateError}
+                  </p>
+                )}
+
+                {passwordUpdated && (
+                  <p className="text-xs text-emerald-600">Password updated!</p>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
+                    onClick={handleSavePassword}
+                    disabled={isUpdatingPassword}
+                  >
+                    {isUpdatingPassword ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-100"
+                    onClick={handleCancelPasswordChange}
+                    disabled={isUpdatingPassword}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Saved quotes stat */}
           <div className="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-5">
@@ -252,7 +468,20 @@ export const Profile = () => {
           </p>
 
           {/* Sign out */}
-          <div className="mt-8 flex justify-end">
+          <div className="mt-8 flex items-center justify-end gap-2">
+            {isEmailUser && !showChangePassword && (
+              <button
+                type="button"
+                className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-300 hover:text-neutral-900"
+                onClick={() => {
+                  setShowChangePassword(true);
+                  setPasswordUpdateError(null);
+                  setPasswordUpdated(false);
+                }}
+              >
+                Change password
+              </button>
+            )}
             <button
               type="button"
               className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-300 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
@@ -273,7 +502,9 @@ export const Profile = () => {
           {!showDeleteConfirm ? (
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-neutral-800">Delete account</p>
+                <p className="text-sm font-medium text-neutral-800">
+                  Delete account
+                </p>
                 <p className="mt-0.5 text-xs text-neutral-500">
                   Permanently removes your account and all saved quotes.
                 </p>
@@ -324,7 +555,6 @@ export const Profile = () => {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
