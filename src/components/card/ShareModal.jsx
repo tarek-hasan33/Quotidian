@@ -94,25 +94,27 @@ export const ShareModal = ({
         </div>
       </div>
 
-      {/* Theme selector — horizontally scrollable on mobile */}
-      <div className="mt-1 flex w-full gap-3 overflow-x-auto px-2 py-1 sm:mt-6 sm:justify-center sm:overflow-x-visible">
-        {cardThemes.map((item) => {
-          const isSelected = item.id === theme.id;
-          const previewBackground = item.containerStyle?.background;
+      {/* Theme selector — centered on mobile */}
+      <div className="mt-1 w-full overflow-x-auto sm:mt-6 sm:overflow-x-visible">
+        <div className="mx-auto flex w-max gap-3 px-2 py-1 sm:justify-center">
+          {cardThemes.map((item) => {
+            const isSelected = item.id === theme.id;
+            const previewBackground = item.containerStyle?.background;
 
-          return (
-            <button
-              key={item.id}
-              type="button"
-              aria-label={item.name}
-              onClick={() => setSelectedThemeId(item.id)}
-              className={`h-10 w-10 flex-shrink-0 rounded-full border border-neutral-200 ring-offset-2 ring-offset-white ${
-                isSelected ? "ring-2 ring-neutral-900" : "ring-0"
-              }`}
-              style={{ background: previewBackground }}
-            />
-          );
-        })}
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-label={item.name}
+                onClick={() => setSelectedThemeId(item.id)}
+                className={`h-10 w-10 flex-shrink-0 rounded-full border border-neutral-200 ring-offset-2 ring-offset-white ${
+                  isSelected ? "ring-2 ring-neutral-900" : "ring-0"
+                }`}
+                style={{ background: previewBackground }}
+              />
+            );
+          })}
+        </div>
       </div>
 
       {/* Action buttons — single column on mobile, 2-col on sm+ */}
