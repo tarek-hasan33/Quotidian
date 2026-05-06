@@ -79,20 +79,23 @@ export const ShareModal = ({
       </div>
 
       {/* Card preview — scales down on mobile */}
-      <div className="mt-6 flex items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[320px] origin-top scale-100 sm:max-w-none">
+      <div className="relative mt-2 flex h-[390px] items-center justify-center px-0 sm:mt-6 sm:h-auto">
+        <div className="absolute -left-[9999px] top-0" aria-hidden="true">
           <CardPreview
             ref={cardRef}
             content={content}
             author={author}
             theme={theme}
-            forwardedRef={cardRef}
           />
+        </div>
+
+        <div className="origin-center scale-[0.68] sm:scale-100">
+          <CardPreview content={content} author={author} theme={theme} />
         </div>
       </div>
 
       {/* Theme selector — horizontally scrollable on mobile */}
-      <div className="mt-6 flex gap-3 overflow-x-auto pb-1">
+      <div className="mt-1 flex w-full gap-3 overflow-x-auto px-2 py-1 sm:mt-6 sm:justify-center sm:overflow-x-visible">
         {cardThemes.map((item) => {
           const isSelected = item.id === theme.id;
           const previewBackground = item.containerStyle?.background;
@@ -103,7 +106,7 @@ export const ShareModal = ({
               type="button"
               aria-label={item.name}
               onClick={() => setSelectedThemeId(item.id)}
-              className={`h-10 w-10 flex-shrink-0 rounded-full border border-neutral-200 ${
+              className={`h-10 w-10 flex-shrink-0 rounded-full border border-neutral-200 ring-offset-2 ring-offset-white ${
                 isSelected ? "ring-2 ring-neutral-900" : "ring-0"
               }`}
               style={{ background: previewBackground }}

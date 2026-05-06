@@ -11,8 +11,10 @@ export const Modal = ({ isOpen, onClose, children }) => {
         aria-label="Close modal"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl">
-        {children}
+      <div className="relative mx-3 mb-3 w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl sm:mx-0 sm:mb-0 sm:h-auto sm:max-h-[90vh]">
+        <div className="max-h-[85vh] overflow-y-auto p-6 sm:max-h-[90vh]">
+          {children}
+        </div>
       </div>
     </div>
   );
