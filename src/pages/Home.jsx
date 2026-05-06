@@ -14,7 +14,7 @@ export const Home = () => {
   const { quote, loading, error } = useDailyQuote();
 
   return (
-    <div className="min-h-[calc(100vh-60px)] bg-neutral-50">
+    <div className="w-full overflow-x-hidden min-h-[calc(100vh-60px)] bg-neutral-50">
       <div className="mx-auto max-w-2xl px-4 py-10">
         <p className="text-xs uppercase tracking-widest text-neutral-400">
           Quote of the day

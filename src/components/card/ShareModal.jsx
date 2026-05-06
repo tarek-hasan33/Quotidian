@@ -78,17 +78,21 @@ export const ShareModal = ({
         </button>
       </div>
 
-      <div className="mt-6 flex items-center justify-center">
-        <CardPreview
-          ref={cardRef}
-          content={content}
-          author={author}
-          theme={theme}
-          forwardedRef={cardRef}
-        />
+      {/* Card preview — scales down on mobile */}
+      <div className="mt-6 flex items-center justify-center overflow-hidden">
+        <div className="w-full max-w-[320px] origin-top scale-100 sm:max-w-none">
+          <CardPreview
+            ref={cardRef}
+            content={content}
+            author={author}
+            theme={theme}
+            forwardedRef={cardRef}
+          />
+        </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
+      {/* Theme selector — horizontally scrollable on mobile */}
+      <div className="mt-6 flex gap-3 overflow-x-auto pb-1">
         {cardThemes.map((item) => {
           const isSelected = item.id === theme.id;
           const previewBackground = item.containerStyle?.background;
@@ -99,7 +103,7 @@ export const ShareModal = ({
               type="button"
               aria-label={item.name}
               onClick={() => setSelectedThemeId(item.id)}
-              className={`h-10 w-10 rounded-full border border-neutral-200 ${
+              className={`h-10 w-10 flex-shrink-0 rounded-full border border-neutral-200 ${
                 isSelected ? "ring-2 ring-neutral-900" : "ring-0"
               }`}
               style={{ background: previewBackground }}
@@ -108,31 +112,32 @@ export const ShareModal = ({
         })}
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      {/* Action buttons — single column on mobile, 2-col on sm+ */}
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           type="button"
-          className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
           onClick={handleDownload}
         >
           Download PNG
         </button>
         <button
           type="button"
-          className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
           onClick={handleCopy}
         >
           {copied ? "Copied!" : "Copy to clipboard"}
         </button>
         <button
           type="button"
-          className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
           onClick={() => handleShare(whatsappUrl)}
         >
           Share to WhatsApp
         </button>
         <button
           type="button"
-          className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
           onClick={() => handleShare(twitterUrl)}
         >
           Share to Twitter

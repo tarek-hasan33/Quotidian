@@ -65,7 +65,7 @@ export const Profile = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-60px)] bg-neutral-50 px-4 py-10">
+    <div className="w-full overflow-x-hidden min-h-[calc(100vh-60px)] bg-neutral-50 px-4 py-10">
       <div className="mx-auto w-full max-w-2xl space-y-4">
 
         {/* Main profile card */}

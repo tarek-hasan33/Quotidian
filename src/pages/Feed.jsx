@@ -36,7 +36,7 @@ const SkeletonGrid = ({ count }) =>
     <QuoteCardSkeleton key={`skeleton-${i}`} />
   ));
 
-export const Search = () => {
+export const Feed = () => {
   const [query, setQuery] = useState("");
   const isSearching = query.trim().length >= 2;
 
@@ -60,7 +60,7 @@ export const Search = () => {
   } = useQuoteFeed();
 
   return (
-    <div className="min-h-[calc(100vh-60px)] bg-neutral-50">
+    <div className="w-full overflow-x-hidden min-h-[calc(100vh-60px)] bg-neutral-50">
       <div className="mx-auto max-w-2xl px-4 py-10">
 
         {/* ── Search input ── */}

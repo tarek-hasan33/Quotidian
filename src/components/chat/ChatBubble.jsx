@@ -145,8 +145,7 @@ export const ChatBubble = () => {
         <div className="fixed bottom-[92px] right-6 z-50 flex h-[60vh] max-h-[70vh] w-[calc(100%-48px)] max-w-[320px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl sm:inset-auto sm:bottom-[92px] sm:right-[32rem] sm:h-[500px] sm:w-[380px] sm:max-w-none">
           <div className="border-b border-neutral-200 bg-primary-50 px-4 py-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-neutral-900">
-                <span className="mr-1">✨</span>
+              <h2 className="text-base font-semibold text-neutral-900">
                 Quotidian Chat
               </h2>
               <button

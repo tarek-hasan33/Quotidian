@@ -7,7 +7,6 @@ export const CardPreview = forwardRef(
     const displayContent =
       content.length > 800 ? content.slice(0, 800) + "…" : content;
 
-    // Only override fontSize for longer quotes; short quotes use the theme default (36px)
     const fontSizeOverride =
       content.length <= 120
         ? undefined

@@ -31,8 +31,8 @@ export const Navbar = () => {
           <NavLink to="/" className={navLinkClass} end>
             Home
           </NavLink>
-          <NavLink to="/search" className={navLinkClass}>
-            Search
+          <NavLink to="/feed" className={navLinkClass}>
+            Discover
           </NavLink>
           <NavLink to="/favourites" className={navLinkClass}>
             Favourites
@@ -74,25 +74,37 @@ export const Navbar = () => {
       </div>
 
       <MobileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col">
           <NavLink
             to="/"
-            className={navLinkClass}
+            className={({ isActive }) =>
+              `flex min-h-[44px] items-center text-sm font-medium transition-colors ${
+                isActive ? "text-primary-600" : "text-neutral-600 hover:text-neutral-900"
+              }`
+            }
             onClick={() => setIsOpen(false)}
             end
           >
             Home
           </NavLink>
           <NavLink
-            to="/search"
-            className={navLinkClass}
+            to="/feed"
+            className={({ isActive }) =>
+              `flex min-h-[44px] items-center text-sm font-medium transition-colors ${
+                isActive ? "text-primary-600" : "text-neutral-600 hover:text-neutral-900"
+              }`
+            }
             onClick={() => setIsOpen(false)}
           >
-            Search
+            Discover
           </NavLink>
           <NavLink
             to="/favourites"
-            className={navLinkClass}
+            className={({ isActive }) =>
+              `flex min-h-[44px] items-center text-sm font-medium transition-colors ${
+                isActive ? "text-primary-600" : "text-neutral-600 hover:text-neutral-900"
+              }`
+            }
             onClick={() => setIsOpen(false)}
           >
             Favourites
@@ -101,7 +113,7 @@ export const Navbar = () => {
           {user ? (
             <Link
               to="/profile"
-              className="text-sm font-medium text-neutral-700"
+              className="flex min-h-[44px] items-center text-sm font-medium text-neutral-700"
               onClick={() => setIsOpen(false)}
             >
               Profile
@@ -109,7 +121,7 @@ export const Navbar = () => {
           ) : (
             <Link
               to="/login"
-              className="text-sm font-medium text-neutral-700"
+              className="flex min-h-[44px] items-center text-sm font-medium text-neutral-700"
               onClick={() => setIsOpen(false)}
             >
               Login
