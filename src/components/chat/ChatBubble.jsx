@@ -142,7 +142,7 @@ export const ChatBubble = () => {
   return (
     <>
       {isOpen ? (
-        <div className="fixed bottom-[92px] right-6 z-50 flex h-[60vh] max-h-[70vh] w-[calc(100%-48px)] max-w-[320px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl sm:inset-auto sm:bottom-[92px] sm:right-[32rem] sm:h-[500px] sm:w-[380px] sm:max-w-none">
+        <div className="fixed bottom-[92px] right-6 z-50 flex h-[60vh] max-h-[70vh] w-[calc(100%-48px)] max-w-[320px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl sm:inset-auto sm:bottom-[92px] sm:h-[500px] sm:w-[380px] sm:max-w-none md:bottom-[104px] md:right-8 xl:right-[32rem]">
           <div className="border-b border-neutral-200 bg-primary-50 px-4 py-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-neutral-900">
@@ -187,7 +187,7 @@ export const ChatBubble = () => {
         </div>
       ) : null}
 
-      <div className="fixed bottom-6 right-6 z-50 flex items-center justify-center sm:right-[32rem]">
+      <div className="fixed bottom-6 right-6 z-50 flex items-center justify-center md:bottom-8 md:right-8 xl:right-[32rem]">
         {showHint ? (
           <div className="absolute bottom-full mb-3 flex flex-col items-center">
             <div className="relative rounded-full bg-primary-600 px-4 py-2 text-sm text-white shadow-md motion-safe:animate-bounce">
