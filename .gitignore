@@ -1,7 +1,6 @@
 node_modules/
 dist/
 .vite/
-.github/
 
 .env
 .env.local
@@ -19,3 +18,4 @@ supabase/.env
 
 docs/PROMPT_GUIDE.md
 docs/REPROMPT_GUIDE.md
+copilot-instructions.md
