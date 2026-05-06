@@ -13,7 +13,8 @@ npm run dev
 # Build for production
 npm run build
 
-# Deploy Supabase Edge Functions (only 2 needed now)
+# Deploy Supabase Edge Functions
+supabase functions deploy get-daily-quote
 supabase functions deploy search-quotes
 supabase functions deploy chat
 
@@ -25,22 +26,24 @@ supabase secrets set GEMINI_API_KEY=your_key_here
 
 ## External URLs
 
-| Service                               | URL                                    |
-| ------------------------------------- | -------------------------------------- |
-| Supabase Dashboard                    | https://app.supabase.com               |
-| Vercel Dashboard                      | https://vercel.com/dashboard           |
-| Google Cloud Console (for OAuth)      | https://console.cloud.google.com       |
+| Service | URL |
+|---|---|
+| Supabase Dashboard | https://app.supabase.com |
+| Vercel Dashboard | https://vercel.com/dashboard |
+| Google Cloud Console (for OAuth) | https://console.cloud.google.com |
 | GitHub Developer Settings (for OAuth) | https://github.com/settings/developers |
-| Google AI Studio (get Gemini key)     | https://aistudio.google.com            |
-| Quotable API docs                     | https://github.com/lukePeavey/quotable |
+| Google AI Studio (get Gemini key) | https://aistudio.google.com |
+| Quotable API docs | https://github.com/lukePeavey/quotable |
 
 ---
 
 ## Quotable API Endpoints
 
 ```
-Random quote:     GET https://zenquotes.io/api/random
-Quotes list:      GET https://zenquotes.io/api/quotes (filter client-side)
+Random quote:     GET https://api.quotable.io/random
+Search quotes:    GET https://api.quotable.io/search/quotes?query=wisdom
+Quote by ID:      GET https://api.quotable.io/quotes/:id
+List tags:        GET https://api.quotable.io/tags
 ```
 
 ---
@@ -48,10 +51,11 @@ Quotes list:      GET https://zenquotes.io/api/quotes (filter client-side)
 ## Supabase Tables
 
 ```
+quotes         — id, content, author, tags[], language  (~500k rows, public read)
 saved_quotes   — id, user_id, content, author, tags[], source_id, saved_at
 profiles       — id, display_name, avatar_url, created_at, updated_at
 
-Quote of the day → localStorage only (key: 'quotidian_daily_quote')
+Quote of the day → random row from quotes table, cached in localStorage
 ```
 
 ---
@@ -59,24 +63,22 @@ Quote of the day → localStorage only (key: 'quotidian_daily_quote')
 ## Edge Functions
 
 ```
-search-quotes    — proxies Quotable search, no auth needed
-chat             — proxies to Gemini API, no auth needed
+get-daily-quote  — picks random quote from Supabase quotes table
+search-quotes    — full text search on Supabase quotes table
+chat             — proxies to Gemini 2.0 Flash API
 ```
-
-Note: No Edge Function needed for quote of the day — it's handled
-entirely in the browser via localStorage + direct Quotable API call.
 
 ---
 
 ## Card Themes
 
-| ID                | Name            | Style                       |
-| ----------------- | --------------- | --------------------------- |
-| `minimal-light`   | Minimal Light   | White/cream background      |
-| `minimal-dark`    | Minimal Dark    | Dark background, light text |
-| `gradient-sunset` | Gradient Sunset | Orange → Pink → Purple      |
-| `gradient-ocean`  | Gradient Ocean  | Sky blue → Indigo           |
-| `gradient-forest` | Gradient Forest | Emerald → Cyan              |
+| ID | Name | Style |
+|---|---|---|
+| `minimal-light` | Minimal Light | White/cream background |
+| `minimal-dark` | Minimal Dark | Dark background, light text |
+| `gradient-sunset` | Gradient Sunset | Orange → Pink → Purple |
+| `gradient-ocean` | Gradient Ocean | Sky blue → Indigo |
+| `gradient-forest` | Gradient Forest | Emerald → Cyan |
 
 ---
 
@@ -86,14 +88,9 @@ entirely in the browser via localStorage + direct Quotable API call.
 Wrap with `<ProtectedRoute>` in App.jsx:
 
 ```jsx
-<Route
-  path="/favourites"
-  element={
-    <ProtectedRoute>
-      <Favourites />
-    </ProtectedRoute>
-  }
-/>
+<Route path="/favourites" element={
+  <ProtectedRoute><Favourites /></ProtectedRoute>
+} />
 ```
 
 ---

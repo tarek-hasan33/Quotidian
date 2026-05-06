@@ -7,12 +7,12 @@ export const CardPreview = forwardRef(
     return (
       <div
         ref={forwardedRef}
-        className="flex h-[540px] w-[540px] items-center justify-center"
+        className="flex h-[540px] w-[540px] items-center justify-center rounded-2xl"
         style={theme?.containerStyle}
       >
         <div className="relative text-center">
           <div
-            className="absolute -top-8 left-1/2 -translate-x-1/2 text-[120px] font-serif leading-none"
+            className="absolute -top-14 left-1/2 -translate-x-1/2 text-[120px] font-serif leading-none"
             style={{ color: quoteColor, opacity: 0.15 }}
           >
             &quot;

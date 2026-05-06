@@ -32,27 +32,32 @@ serve(async (req) => {
     }));
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent" +
         `?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
           contents,
         }),
       }
     );
 
+    const responseText = await response.text();
+    console.log("Gemini response", {
+      status: response.status,
+      body: responseText,
+    });
+
     if (!response.ok) {
-      const errorText = await response.text();
-      return new Response(JSON.stringify({ error: errorText }), {
+      return new Response(JSON.stringify({ error: responseText }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
     return new Response(JSON.stringify({ data: text }), {

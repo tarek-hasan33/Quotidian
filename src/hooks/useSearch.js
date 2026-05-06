@@ -10,7 +10,7 @@ export const useSearch = (query) => {
   useEffect(() => {
     let isMounted = true;
 
-    if (!query) {
+    if (!query || query.trim().length < 2) {
       setResults([]);
       setLoading(false);
       setError(null);
@@ -41,8 +41,8 @@ export const useSearch = (query) => {
           throw invokeError;
         }
 
-        const mappedResults = (data ?? []).map((item) => ({
-          sourceId: item?.sourceId ?? null,
+        const mappedResults = (data?.results ?? []).map((item) => ({
+          sourceId: item?.id ?? null,
           content: item?.content ?? "",
           author: item?.author ?? "",
           tags: item?.tags ?? [],

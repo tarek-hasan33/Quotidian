@@ -16,7 +16,7 @@ export const QuoteCard = ({
   return (
     <div className="relative rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
       <div className="text-6xl font-serif text-primary-100">&quot;</div>
-      <p className="mt-2 font-serif text-xl italic leading-relaxed text-neutral-800">
+      <p className="-mt-4 font-serif text-lg italic leading-relaxed text-neutral-800 sm:text-xl">
         {content}
       </p>
       <p className="mt-4 text-sm text-neutral-500">— {author}</p>
@@ -39,18 +39,27 @@ export const QuoteCard = ({
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
               <path
-                d="M14 8l-4 4 4 4"
+                d="M12 16V7"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               <path
-                d="M5 12h9a4 4 0 1 1 0 8h-2"
+                d="M8.5 10.5L12 7l3.5 3.5"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                fill="none"
+              />
+              <path
+                d="M5 16.5a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 16.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
               />
             </svg>
           </button>

@@ -9,7 +9,41 @@ Run these SQL statements in your Supabase SQL Editor (in order).
 
 ## Tables
 
-### 1. saved_quotes
+### 1. quotes
+Stores all quotes imported from the dataset. This is the main quotes source.
+Already created and populated — listed here for reference.
+
+```sql
+create table quotes (
+  id       uuid primary key default gen_random_uuid(),
+  content  text not null,
+  author   text not null,
+  tags     text[] default '{}',
+  language text default 'en'
+);
+
+-- Full text search index (run this if not already created)
+create index idx_quotes_fts on quotes
+using gin(to_tsvector('english', content || ' ' || author));
+
+-- Random quote performance index
+create index idx_quotes_random on quotes(id);
+```
+
+RLS note: The `quotes` table is public read — anyone can read quotes,
+no login required. No RLS policies needed on this table since it's
+read-only public data. The Edge Functions use the anon key to read it.
+
+```sql
+-- Allow anyone to read quotes (run this)
+alter table quotes enable row level security;
+
+create policy "Anyone can read quotes"
+  on quotes for select
+  using (true);
+```
+
+### 2. saved_quotes
 Stores quotes a user has saved to their favourites.
 
 ```sql
@@ -118,20 +152,24 @@ auth.users (managed by Supabase)
     │
     └──< saved_quotes   (1 user → many saved quotes)
 
-Quote of the day → stored in each user's localStorage (no DB table)
+quotes              (public read-only, ~500k rows, imported from dataset)
+Quote of the day    → random row from quotes table, cached in localStorage
 ```
 
 ---
 
 ## Notes
 
-- `source_id` on `saved_quotes` is the ID from Quotable API (e.g. `"abc123"`).
+- `quotes` table has ~500k rows imported from a Kaggle dataset. It is
+  read-only public data — no user can insert or modify it. Only the
+  Supabase service role (Edge Functions) reads from it.
+
+- `source_id` on `saved_quotes` is the UUID from the `quotes` table.
   Used to detect if a user already saved that quote and to prevent duplicates.
   Quotes without a source_id can still be saved — the unique index only applies
   when source_id is not null.
 
-- `tags` is stored as a Postgres array (`text[]`). Pass tags from Quotable API
-  directly. Query with: `where 'wisdom' = any(tags)`
+- `tags` on `saved_quotes` is stored as a Postgres array (`text[]`).
 
 - All timestamps use `timestamptz` (timezone-aware). Supabase stores everything
   in UTC. Convert to local time in the frontend.

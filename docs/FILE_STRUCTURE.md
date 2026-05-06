@@ -20,7 +20,7 @@ quotidian/
 │   │
 │   ├── hooks/
 │   │   ├── useAuth.js              # Returns { user, loading } from AuthContext
-│   │   ├── useDailyQuote.js        # Fetches quote from Quotable API, caches in localStorage
+│   │   ├── useDailyQuote.js        # Checks localStorage, fetches from get-daily-quote Edge Function if needed
 │   │   ├── useSavedQuotes.js       # Fetch, save, unsave quotes for current user
 │   │   └── useSearch.js            # Search logic, debouncing, results state
 │   │
@@ -71,10 +71,12 @@ quotidian/
 │
 ├── supabase/
 │   └── functions/
+│       ├── get-daily-quote/
+│       │   └── index.ts            # Edge Function: random quote from Supabase quotes table
 │       ├── search-quotes/
-│       │   └── index.ts            # Edge Function: proxy Quotable search
+│       │   └── index.ts            # Edge Function: full text search on Supabase quotes table
 │       └── chat/
-│           └── index.ts            # Edge Function: proxy messages to Gemini API
+│           └── index.ts            # Edge Function: proxy messages to Gemini 2.0 Flash
 │
 ├── .env                            # Local env vars (never commit this)
 ├── .env.example                    # Safe template to commit (no real values)

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,39 +13,33 @@ serve(async (req) => {
   }
 
   try {
-    // ZenQuotes free tier has no search API; filter server-side.
     const { query = "" } = await req.json().catch(() => ({ query: "" }));
+    const trimmedQuery = query.trim();
 
-    const response = await fetch("https://zenquotes.io/api/quotes");
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch quotes");
+    if (trimmedQuery.length < 2) {
+      return new Response(JSON.stringify({ results: [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const data = await response.json();
-    const normalizedQuery = query.toLowerCase();
-    const filtered = (data ?? []).filter((item: { q?: string; a?: string }) => {
-      if (!normalizedQuery) {
-        return true;
-      }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-      const content = item?.q ?? "";
-      const author = item?.a ?? "";
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error("Missing Supabase environment variables");
+    }
 
-      return (
-        content.toLowerCase().includes(normalizedQuery) ||
-        author.toLowerCase().includes(normalizedQuery)
-      );
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+    const { data, error } = await supabase.rpc("search_quotes", {
+      search_query: trimmedQuery,
     });
 
-    const mapped = filtered.map((item: { q?: string; a?: string }) => ({
-      content: item?.q ?? "",
-      author: item?.a ?? "",
-      tags: [],
-      sourceId: null,
-    }));
+    if (error) {
+      throw error;
+    }
 
-    return new Response(JSON.stringify(mapped), {
+    return new Response(JSON.stringify({ results: data ?? [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

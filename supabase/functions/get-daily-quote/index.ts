@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,22 +13,40 @@ serve(async (req) => {
   }
 
   try {
-    const response = await fetch("https://zenquotes.io/api/random");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch daily quote");
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error("Missing Supabase environment variables");
     }
 
-    const data = await response.json();
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    const payload = {
-      content: data?.[0]?.q ?? "",
-      author: data?.[0]?.a ?? "",
-      tags: [],
-      sourceId: null,
-    };
+    const { count, error: countError } = await supabase
+      .from("quotes")
+      .select("id", { count: "exact", head: true });
 
-    return new Response(JSON.stringify(payload), {
+    if (countError) {
+      throw countError;
+    }
+
+    if (!count || count === 0) {
+      throw new Error("No quotes available");
+    }
+
+    const offset = Math.floor(Math.random() * count);
+
+    const { data, error: quoteError } = await supabase
+      .from("quotes")
+      .select("id, content, author, tags")
+      .range(offset, offset)
+      .single();
+
+    if (quoteError) {
+      throw quoteError;
+    }
+
+    return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

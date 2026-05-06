@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export const ChatInput = ({ onSend, disabled }) => {
   const [message, setMessage] = useState("");
+  const isDisabled = disabled || !message.trim();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -21,7 +22,7 @@ export const ChatInput = ({ onSend, disabled }) => {
     >
       <input
         type="text"
-        className="flex-1 rounded-full border border-neutral-200 px-4 py-2 text-sm text-neutral-700 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
+        className="h-11 flex-1 rounded-lg border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none transition-colors placeholder:text-neutral-400 focus:border-primary-500"
         placeholder="Ask about a quote..."
         value={message}
         onChange={(event) => setMessage(event.target.value)}
@@ -29,10 +30,13 @@ export const ChatInput = ({ onSend, disabled }) => {
       />
       <button
         type="submit"
-        disabled={disabled}
-        className="rounded-full bg-primary-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isDisabled}
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-600 text-neutral-900 transition-colors duration-150 hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label="Send message"
       >
-        Send
+        <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+          <path d="M21 12l-18 9 4-9-4-9 18 9z" fill="currentColor" />
+        </svg>
       </button>
     </form>
   );

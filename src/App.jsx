@@ -3,7 +3,7 @@ import { Navbar } from "./components/layout/Navbar";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import { Home } from "./pages/Home";
 import { Search } from "./pages/Search";
-import { Chat } from "./pages/Chat";
+import { ChatBubble } from "./components/chat/ChatBubble";
 import { Favourites } from "./pages/Favourites";
 import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
@@ -14,7 +14,6 @@ export const App = () => (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/search" element={<Search />} />
-      <Route path="/chat" element={<Chat />} />
       <Route
         path="/favourites"
         element={
@@ -33,5 +32,6 @@ export const App = () => (
         }
       />
     </Routes>
+    <ChatBubble />
   </BrowserRouter>
 );

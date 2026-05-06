@@ -34,9 +34,6 @@ export const Navbar = () => {
           <NavLink to="/search" className={navLinkClass}>
             Search
           </NavLink>
-          <NavLink to="/chat" className={navLinkClass}>
-            Chat
-          </NavLink>
           <NavLink to="/favourites" className={navLinkClass}>
             Favourites
           </NavLink>
@@ -92,13 +89,6 @@ export const Navbar = () => {
             onClick={() => setIsOpen(false)}
           >
             Search
-          </NavLink>
-          <NavLink
-            to="/chat"
-            className={navLinkClass}
-            onClick={() => setIsOpen(false)}
-          >
-            Chat
           </NavLink>
           <NavLink
             to="/favourites"

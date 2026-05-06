@@ -99,13 +99,26 @@ export const useSavedQuotes = () => {
   );
 
   const isSaved = useCallback(
-    (sourceId) => savedQuotes.some((quote) => quote.source_id === sourceId),
+    (sourceId) => {
+      if (!sourceId) {
+        return false;
+      }
+
+      return savedQuotes.some((quote) => quote.source_id === sourceId);
+    },
     [savedQuotes]
   );
 
   const getSavedId = useCallback(
-    (sourceId) =>
-      savedQuotes.find((quote) => quote.source_id === sourceId)?.id ?? null,
+    (sourceId) => {
+      if (!sourceId) {
+        return null;
+      }
+
+      return (
+        savedQuotes.find((quote) => quote.source_id === sourceId)?.id ?? null
+      );
+    },
     [savedQuotes]
   );
 

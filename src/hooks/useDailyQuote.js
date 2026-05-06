@@ -23,10 +23,10 @@ export const useDailyQuote = () => {
           if (parsed?.date === today) {
             if (isMounted) {
               setQuote({
+                id: parsed.id,
                 content: parsed.content,
                 author: parsed.author,
                 tags: parsed.tags ?? [],
-                sourceId: parsed.sourceId,
               });
               setLoading(false);
             }
@@ -48,10 +48,10 @@ export const useDailyQuote = () => {
         }
 
         const nextQuote = {
+          id: data?.id ?? null,
           content: data?.content ?? "",
           author: data?.author ?? "",
           tags: data?.tags ?? [],
-          sourceId: data?.sourceId ?? null,
         };
 
         localStorage.setItem(

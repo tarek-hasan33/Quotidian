@@ -36,7 +36,7 @@ export const SaveButton = ({ sourceId, content, author, tags }) => {
       <button
         type="button"
         className={`rounded-lg p-2 hover:bg-neutral-100 ${
-          saved ? "text-amber-500" : "text-neutral-300"
+          saved ? "text-red-500" : "text-neutral-300"
         }`}
         aria-label={saved ? "Unsave quote" : "Save quote"}
         onClick={handleClick}
