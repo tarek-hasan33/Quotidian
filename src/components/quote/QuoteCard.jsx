@@ -30,6 +30,7 @@ export const QuoteCard = ({
       <div className="mt-auto min-w-0">
         <div className="mt-4 flex min-w-0 items-center justify-between gap-2">
           <p
+            title={author}
             className="min-w-0 truncate text-sm text-neutral-500"
             style={{ maxWidth: "65%" }}
           >
