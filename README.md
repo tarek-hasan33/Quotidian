@@ -140,7 +140,6 @@ quotidian/
 │       └── chat/              # Gemini API proxy
 ├── docs/                  # Planning, design, database docs
 └── .github/
-    ├── copilot-instructions.md
     └── workflows/
         └── keep-alive.yml     # Pings Supabase every 3 days
 ```
@@ -149,7 +148,6 @@ quotidian/
 
 ## 🔒 Security
 
-- No API keys in frontend code — Gemini and Groq keys live only in Supabase Edge Function environment
 - Supabase Row Level Security on all user tables
 - Password strength enforcement on signup (8+ chars, uppercase, special character)
 - Chat rate limiting (10 messages/day for guests, 50 for logged-in users)
@@ -182,7 +180,7 @@ Full planning and technical documentation lives in the `docs/` folder:
 
 ## 🙏 Acknowledgements
 
-- Quotes dataset from [Kaggle](https://www.kaggle.com)
+- Quotes dataset from [Kaggle](https://www.kaggle.com/datasets/manann/quotes-500k)
 - Icons from [Lucide](https://lucide.dev)
 - Fonts: [Lora](https://fonts.google.com/specimen/Lora) and [Inter](https://fonts.google.com/specimen/Inter) via Google Fonts
 - Built with the help of GitHub Copilot and Claude
