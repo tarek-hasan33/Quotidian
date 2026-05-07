@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown';
+
 const formatTimestamp = (value) => {
   if (!value) return "";
   const date = new Date(value);
@@ -19,7 +21,9 @@ export const ChatMessage = ({ role, content, timestamp }) => {
       <div className="flex justify-end">
         <div className={`flex ${maxWidthClass} flex-col items-end gap-1`}>
           <div className="w-full rounded-2xl rounded-br-sm border border-neutral-800 bg-neutral-900 px-4 py-2.5 text-sm text-white">
-            {content}
+            <div className="prose prose-sm max-w-none prose-invert [&_p]:mb-0">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
           </div>
           {timeLabel ? (
             <span className="text-[11px] text-neutral-500">{timeLabel}</span>
@@ -36,7 +40,9 @@ export const ChatMessage = ({ role, content, timestamp }) => {
       </div>
       <div className={`flex ${maxWidthClass} flex-col items-start gap-1`}>
         <div className="w-full rounded-2xl rounded-bl-sm border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800">
-          {content}
+          <div className="prose prose-sm max-w-none [&_p]:mb-0">
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
         </div>
         {timeLabel ? (
           <span className="text-[11px] text-neutral-500">{timeLabel}</span>
