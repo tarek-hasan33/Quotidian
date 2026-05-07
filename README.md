@@ -15,7 +15,7 @@ Every user gets their own personal daily quote — different from everyone else'
 A beautiful quote feed with 10 new randomized quotes every visit. Search through 500,000+ quotes by keyword or author using full-text search powered by PostgreSQL. Results are ranked, paginated, and fast.
 
 ### 🤖 Quote Chatbot
-A floating AI assistant that only talks about quotes. Ask about meaning, context, authors, themes, or similar quotes. Powered by Google Gemini. Knows when to stay in its lane.
+A floating AI assistant that only talks about quotes. Ask about meaning, context, authors, themes, or similar quotes. Powered by Google Gemini 3 Flash Preview with Groq llama-3.3-70b as a silent fallback — if Gemini hits its rate limit, Groq kicks in automatically. Users never notice the switch.
 
 ### ❤️ Favourites
 Save any quote from anywhere in the app. Build your personal collection. Requires an account — your favourites follow you.
@@ -40,7 +40,7 @@ Sign in with Email & Password, Google, or GitHub. Password strength enforcement,
 | Database | Supabase Postgres |
 | Backend | Supabase Edge Functions (Deno) |
 | Quotes Dataset | 500k quotes (Kaggle) |
-| Chatbot | Google Gemini 2.5 Flash |
+| Chatbot | Google Gemini 3 Flash Preview (primary) + Groq llama-3.3-70b (fallback) |
 
 **Estimated monthly cost: ~$0**
 
@@ -69,7 +69,7 @@ Full-text search is powered by a GIN index on a generated `tsvector` column comb
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/tarek-hasan33/Quotidian
+git clone https://github.com/yourusername/quotidian.git
 cd quotidian
 ```
 
@@ -96,6 +96,7 @@ Run the SQL from `docs/DATABASE.md` in your Supabase SQL Editor.
 In Supabase Dashboard → Edge Functions → Secrets:
 ```
 GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
 ### 6. Deploy Edge Functions
@@ -112,7 +113,7 @@ supabase functions deploy chat
 npm run dev
 ```
 
-Open `http://localhost:5173`
+Open `http://localhost:5173` 🎉
 
 ---
 
@@ -139,6 +140,7 @@ quotidian/
 │       └── chat/              # Gemini API proxy
 ├── docs/                  # Planning, design, database docs
 └── .github/
+    ├── copilot-instructions.md
     └── workflows/
         └── keep-alive.yml     # Pings Supabase every 3 days
 ```
@@ -147,7 +149,7 @@ quotidian/
 
 ## 🔒 Security
 
-- No API keys in frontend code — all secrets live in Supabase Edge Function environment
+- No API keys in frontend code — Gemini and Groq keys live only in Supabase Edge Function environment
 - Supabase Row Level Security on all user tables
 - Password strength enforcement on signup (8+ chars, uppercase, special character)
 - Chat rate limiting (10 messages/day for guests, 50 for logged-in users)
@@ -180,7 +182,7 @@ Full planning and technical documentation lives in the `docs/` folder:
 
 ## 🙏 Acknowledgements
 
-- Quotes dataset from [Kaggle](https://www.kaggle.com/datasets/manann/quotes-500k)
+- Quotes dataset from [Kaggle](https://www.kaggle.com)
 - Icons from [Lucide](https://lucide.dev)
 - Fonts: [Lora](https://fonts.google.com/specimen/Lora) and [Inter](https://fonts.google.com/specimen/Inter) via Google Fonts
 - Built with the help of GitHub Copilot and Claude
